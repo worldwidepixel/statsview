@@ -1,13 +1,13 @@
 <template>
   <div class="statsContainer">
     <h1>{{ USD.format(total_revenue) }} paid to creators</h1>
-    <span>{{ USD.format(all_revenue) }} total revenue since Nov. 12 2022 (est)</span>
+    <a target="_blank" style="color: var(--color-text)" href="https://worldwidepixel.ca/blog/statsview-estimates">Why StatsView no longer provides estimates</a>
     <Line class="chart" v-if="loaded === true" :options="options" :data="chartData" />
     <div class="payout_grid">
       <PayoutNode
         v-for="node in data.data"
         :time="+node.time"
-        :revenue="+node.revenue"
+        :platform-revenue="+node.revenue"
         :creator-revenue="+node.creator_revenue"
         v-bind:key="node"
       />
@@ -67,20 +67,20 @@ const all_revenue = total_90_10_paid * 1.125 + total_25_75_paid * 1.25
 
 const chartInfo = computed(() => {
   let labelData = []
-  let revenueData = []
+  let platformRevenueData = []
   let creatorRevenueData = []
-  let siteRevenueData = []
+  let totalRevenueData = []
   for (const datapoint of data.data) {
     labelData.push(TIME_FORMAT.format(new Date(datapoint.time * 1000)))
-    revenueData.push(datapoint.revenue)
+    platformRevenueData.push(datapoint.revenue)
     creatorRevenueData.push(datapoint.creator_revenue)
-    siteRevenueData.push(datapoint.revenue - datapoint.creator_revenue)
+    totalRevenueData.push(Number(datapoint.revenue) + Number(datapoint.creator_revenue))
   }
   return {
     labels: labelData.reverse(),
-    revenue: revenueData.reverse(),
+    platformRevenue: platformRevenueData.reverse(),
     creatorRevenue: creatorRevenueData.reverse(),
-    siteRevenue: siteRevenueData.reverse()
+    totalRevenue: totalRevenueData.reverse()
   }
 })
 
@@ -137,14 +137,14 @@ const chartData = {
       borderColor: '#43b34fff',
       backgroundColor: '#43b34fff',
       tension: 0,
-      data: chartInfo.value.revenue
+      data: chartInfo.value.totalRevenue
     },
     {
-      label: 'Site Revenue',
+      label: 'Platform Revenue',
       borderColor: '#28cbd4ff',
       backgroundColor: '#28cbd4ff',
       tension: 0,
-      data: chartInfo.value.siteRevenue
+      data: chartInfo.value.platformRevenue
     }
   ]
 }
